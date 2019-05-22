@@ -16,7 +16,7 @@ use StayForLongApi\Services\Billing\Tickets\Update as TicketUpdate;
 
 class RefundController extends Controller
 {
-    const TICKET_DESCRIPTION = "Booking refunded";
+    const TICKET_DESCRIPTION = "Booking refunded"; //DCC: This should be a ticket status/property. Not managed here.
 
     public $request;
     public $booking;
@@ -36,6 +36,8 @@ class RefundController extends Controller
 
         $reason = $this->request->input('reason', '');
 
+        //DCC: This logic shoud be extracted to a method. And is the Booking responsability got the tickets for refund.
+        // If not, this method will be duplicated on all the app.
         $total_already_paid = 0;
         $tickets            = $this->booking->tickets->toArray();
         foreach ($tickets as $ticket) {
@@ -59,12 +61,13 @@ class RefundController extends Controller
             PaymentException::throwBecauseOf("Booking with hash {$hash} not found!");
         }
 
-        $amount = (float)$this->request->input('amount');
+        $amount = (float)$this->request->input('amount'); //DCC: $amount should be a value object.
         $reason = $this->request->input('reason', '');
 
         $this->doRefund($this->booking, $amount, $reason);
     }
 
+    //DCC: This method should be moved out of the controller. And a best option is take as argument a DTO and not a list of parameters.
     public function doRefund(Bookings $booking, $amount, $reason = "")
     {
         $this->booking = $booking;
@@ -79,6 +82,7 @@ class RefundController extends Controller
         $this->refund($this->amount);
     }
 
+    //DCC: Same as applyRefund. This is wrong to be here.
     public function refund($pending_refund_amount)
     {
         foreach ($this->booking->tickets as $ticket) {
@@ -91,6 +95,7 @@ class RefundController extends Controller
         }
     }
 
+    //DCC: Same as applyRefund. No sense here. And $pending_refund_amount should be a Value Object.
     protected function refundTicket(Tickets $ticket, $pending_refund_amount)
     {
         $refunded = $this->applyRefund($ticket, $pending_refund_amount);
@@ -99,6 +104,7 @@ class RefundController extends Controller
         return $pending_refund_amount;
     }
 
+    //DCC: That could be ok. But in my opinion is a View Layer responsability "prepare" how it show look the data. This is a Controller.
     protected function getTicketDescription()
     {
         if (empty($this->reason)) {
@@ -107,6 +113,7 @@ class RefundController extends Controller
         return sprintf('%s: %s', self::TICKET_DESCRIPTION, $this->reason);
     }
 
+    //DCC: This must be on a service layer. Not here. And $amount maybe should be a Value Object. Is a common object on the business.
     public function applyRefund(Tickets $ticket, $amount)
     {
         /**
@@ -115,6 +122,7 @@ class RefundController extends Controller
          */
     }
 
+    //DCC: This method is not used on this Controller. Why? If not is needed here, is not his place to be.
     private function sendInternalNotification($message)
     {
         $bookingProcess = new FollowActions($this->booking, $message);

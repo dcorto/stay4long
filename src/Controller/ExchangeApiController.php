@@ -2,11 +2,13 @@
 
 namespace App\Controller;
 
+use App\Services\ExchangeService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+
 
 /**
  * Controller used to manage exchange API
@@ -16,11 +18,19 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ExchangeApiController extends AbstractController
 {
+    protected $exchangeService;
+
+    public function __construct(ExchangeService $exchangeService)
+    {
+        $this->exchangeService = $exchangeService;
+    }
+
     /**
      * @Route("/{currency}", methods={"GET"}, name="exchange_get")
-     *
+     * @param string $currency
+     * @return Response
      */
-    public function exchangeGet(Request $request, string $currency): Response
+    public function exchangeGet(string $currency): Response
     {
 
         $rate = $this->exchangeService->get($currency);
@@ -28,7 +38,7 @@ class ExchangeApiController extends AbstractController
         return new JsonResponse(
            [
                 'status' => 'ok',
-                'rate' => $rate,
+                'rate' => $rate['rate'],
            ],
             JsonResponse::HTTP_OK
         );
