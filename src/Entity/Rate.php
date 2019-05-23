@@ -11,13 +11,7 @@ class Rate
 {
     /**
      * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
-
-    /**
-     * @ORM\Column(type="string", length=3)
+     * @ORM\Column(type="string", length=3, unique=true)
      */
     private $currency;
 
@@ -25,11 +19,6 @@ class Rate
      * @ORM\Column(type="float")
      */
     private $rate;
-
-    public function getId()
-    {
-        return $this->id;
-    }
 
     /**
      * @return mixed

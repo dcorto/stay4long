@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTO\RateDTO;
 use App\Entity\Rate;
 use App\Repository\RateRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,16 +16,15 @@ class ExchangeService {
         $this->em = $entityManager;
     }
 
-    public function get($currency){
-
+    public function get($currency)
+    {
+        //TODO: move to repository
         $items = $this->em->getRepository(Rate::class)->findBy(
             ['currency' => $currency]
         );
 
         if($items) {
-            return [
-                'rate' => $items[0]->getRate(), //TODO: use dto
-            ];
+            return new RateDTO($items[0]);
         }
         else
         {
@@ -32,18 +32,38 @@ class ExchangeService {
         }
     }
 
-    public function update($currency, $rate){
+    public function create($currency, $rate)
+    {
+        try {
+            $entity = new Rate();
 
-        //TODO: Update the storage
+            $entity->setCurrency($currency);
+            $entity->setRate($rate);
 
+            $this->em->persist($entity);
+            $this->em->flush();
+
+            return true;
+        }
+        catch (\Exception $e){
+            return false;
+        }
+    }
+
+    public function update($currency, $rate)
+    {
+
+        //TODO: move to repository
         $items = $this->em->getRepository(Rate::class)->findBy(
             ['currency' => $currency]
         );
 
         //TODO: validate
         try {
+
             $items[0]->setRate($rate);
 
+            //TODO: move to repository
             $this->em->persist($items[0]);
             $this->em->flush();
             return true;
