@@ -1,5 +1,12 @@
 # S4F Test
 
+## Start & Stop environment 
+```
+$ docker-compose up -d
+
+$ docker-compose stop
+```
+
 ## Install vendors
 ```
 $ docker-compose exec php composer install
